@@ -13,22 +13,21 @@ network = builder.create_network(
 
 # Parse the ONNX model
 parser = trt.OnnxParser(network, logger)
-success = parser.parse_from_file("traversability.onnx")
-if not success:
-    print("Failed to parse the ONNX model.")
-    exit(1)
-
+parsed = parser.parse_from_file("traversability.onnx")
+assert parsed
 print("Parsed the ONNX model successfully.")
 
 # Configure the builder
 config = builder.create_builder_config()
-config.set_memory_pool_limit(trt.MemoryPoolType.WORKSPACE, 1 << 30)  # Adjust the workspace size as needed
+config.set_memory_pool_limit(
+    trt.MemoryPoolType.WORKSPACE, 1 << 30
+)  # Adjust the workspace size as needed
 config.set_flag(trt.BuilderFlag.FP16)  # Enable FP16 precision if desired
-
 print("Configured the builder successfully.")
+
 # Create an engine
 engine = builder.build_serialized_network(network, config)
-
+assert engine is not None
 print("Built the engine successfully.")
 
 # Save the serialized engine to a file
