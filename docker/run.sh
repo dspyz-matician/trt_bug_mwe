@@ -20,7 +20,7 @@ docker run --name $CONTAINER_NAME \
     --mount type=bind,source=$HOME/.bash_history,destination=/home/me/.bash_history \
     --user $(id -u):$(id -g) \
     --gpus all \
-    -itd $IMAGE_NAME:latest /bin/bash
+    -itd $IMAGE_NAME:latest /bin/bash -l
 
 echo "Copying configuration files and credentials to the container..."
 
