@@ -16,22 +16,23 @@ echo "Running a new container: $CONTAINER_NAME"
 docker run --name $CONTAINER_NAME \
     -e DISPLAY \
     -v /tmp/.X11-unix:/tmp/.X11-unix \
-    --mount type=bind,source=$(cd $(dirname $(dirname $0)) && pwd),destination=/root/app \
-    --mount type=bind,source=$HOME/.bash_history,destination=/root/.bash_history \
+    --mount type=bind,source=$(cd $(dirname $(dirname $0)) && pwd),destination=/home/me/app \
+    --mount type=bind,source=$HOME/.bash_history,destination=/home/me/.bash_history \
+    --user $(id -u):$(id -g) \
     --gpus all \
     -itd $IMAGE_NAME:latest /bin/bash
 
 echo "Copying configuration files and credentials to the container..."
 
 if [ -f "$HOME/.gitconfig" ]; then
-    docker cp $HOME/.gitconfig $CONTAINER_NAME:/root/.gitconfig
+    docker cp $HOME/.gitconfig $CONTAINER_NAME:/home/me/.gitconfig
 fi
 
 if [ -d "$HOME/.ssh" ]; then
-    docker cp $HOME/.ssh $CONTAINER_NAME:/root/.ssh
+    docker cp $HOME/.ssh $CONTAINER_NAME:/home/me/.ssh
 fi
 
-docker exec $CONTAINER_NAME bash -c "git config --global --add safe.directory /root/app"
+docker exec $CONTAINER_NAME bash -c "git config --global --add safe.directory /home/me/app"
 
 # Check if the -d flag is provided
 if [ "$1" != "-d" ]; then
