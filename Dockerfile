@@ -11,5 +11,7 @@ RUN useradd -m me
 USER me
 
 RUN pip install matplotlib torch==2.2.2 onnx==1.16.0
+RUN pip install polygraphy==0.49.0
+RUN pip install onnxruntime==1.17.1
 
 WORKDIR /home/me/app
