@@ -5,15 +5,19 @@ import torch.nn as nn
 import torch.onnx
 
 
-MAX_TRAV = 21
+MAX_TRAV = 4
 
 
 class Traversability(nn.Module):
     def forward(self, untraversable: torch.Tensor) -> torch.Tensor:
         device = untraversable.device
-        max_trav_sq = torch.tensor(MAX_TRAV**2, device=device, dtype=torch.int32)
-        sq_distances = torch.where(untraversable, 0, max_trav_sq)
-        extra_col = torch.full((sq_distances.shape[0], sq_distances.shape[1], 1), max_trav_sq, device=device)
+        sq_distances = torch.where(untraversable, 0, MAX_TRAV**2)
+        extra_col = torch.full(
+            (sq_distances.shape[0], sq_distances.shape[1], 1),
+            MAX_TRAV**2,
+            device=device,
+            dtype=torch.int32,
+        )
         for d in range(1, MAX_TRAV * 2 + 1, 2):
             sq_distances = torch.minimum(
                 sq_distances,
@@ -22,7 +26,12 @@ class Traversability(nn.Module):
                     torch.cat([extra_col, sq_distances[:, :, :-1] + d], 2),
                 ),
             )
-        extra_row = torch.full((sq_distances.shape[0], 1, sq_distances.shape[2]), max_trav_sq, device=device)
+        extra_row = torch.full(
+            (sq_distances.shape[0], 1, sq_distances.shape[2]),
+            MAX_TRAV**2,
+            device=device,
+            dtype=torch.int32,
+        )
         for d in range(1, MAX_TRAV * 2 + 1, 2):
             sq_distances = torch.minimum(
                 sq_distances,
