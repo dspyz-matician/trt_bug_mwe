@@ -20,6 +20,12 @@ print("Parsed the ONNX model successfully.")
 # Configure the builder
 config = builder.create_builder_config()
 config.max_workspace_size = 1 << 30  # Adjust the workspace size as needed
+disabled_tactics = (
+    (1 << int(trt.TacticSource.CUBLAS))
+    | (1 << int(trt.TacticSource.CUBLAS_LT))
+    | (1 << int(trt.TacticSource.CUDNN))
+)
+config.set_tactic_sources(config.get_tactic_sources() & ~disabled_tactics)
 config.set_flag(trt.BuilderFlag.FP16)  # Enable FP16 precision if desired
 print("Configured the builder successfully.")
 
