@@ -5,42 +5,12 @@ import torch.nn as nn
 import torch.onnx
 
 
-MAX_TRAV = 4
+MAX_TRAV = 2
 
 
 class Traversability(nn.Module):
     def forward(self, untraversable: torch.Tensor) -> torch.Tensor:
-        device = untraversable.device
-        sq_distances = torch.where(untraversable, 0, MAX_TRAV**2)
-        extra_col = torch.full(
-            (sq_distances.shape[0], sq_distances.shape[1], 1),
-            MAX_TRAV**2,
-            device=device,
-            dtype=torch.int32,
-        )
-        for d in range(1, MAX_TRAV * 2 + 1, 2):
-            sq_distances = torch.minimum(
-                sq_distances,
-                torch.minimum(
-                    torch.cat([sq_distances[:, :, 1:] + d, extra_col], 2),
-                    torch.cat([extra_col, sq_distances[:, :, :-1] + d], 2),
-                ),
-            )
-        extra_row = torch.full(
-            (sq_distances.shape[0], 1, sq_distances.shape[2]),
-            MAX_TRAV**2,
-            device=device,
-            dtype=torch.int32,
-        )
-        for d in range(1, MAX_TRAV * 2 + 1, 2):
-            sq_distances = torch.minimum(
-                sq_distances,
-                torch.minimum(
-                    torch.cat([sq_distances[:, 1:, :] + d, extra_row], 1),
-                    torch.cat([extra_row, sq_distances[:, :-1, :] + d], 1),
-                ),
-            )
-        return sq_distances.sqrt()
+        return untraversable.to(torch.int32)
 
 
 # Create an instance of the model
@@ -52,7 +22,7 @@ def save_onnx():
     model.eval()
 
     # Define the input shape
-    dummy_input = torch.randint(0, 2, (3, 224, 224), dtype=torch.bool)
+    dummy_input = torch.randint(0, 2, (3, 224, 224), dtype=torch.uint8)
 
     # Specify the output file path
     onnx_file_path = "traversability.onnx"
