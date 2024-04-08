@@ -19,7 +19,7 @@ print("Parsed the ONNX model successfully.")
 
 # Configure the builder
 config = builder.create_builder_config()
-config.max_workspace_size = 1 << 30  # Adjust the workspace size as needed
+config.set_memory_pool_limit(trt.MemoryPoolType.WORKSPACE, 1 << 30)  # Adjust the workspace size as needed
 disabled_tactics = (
     (1 << int(trt.TacticSource.CUBLAS))
     | (1 << int(trt.TacticSource.CUBLAS_LT))

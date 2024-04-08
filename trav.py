@@ -5,7 +5,7 @@ import torch.nn as nn
 import torch.onnx
 
 
-MAX_TRAV = 2
+MAX_TRAV = 21
 
 
 class Traversability(nn.Module):
