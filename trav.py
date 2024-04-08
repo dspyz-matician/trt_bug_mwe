@@ -11,7 +11,7 @@ MAX_TRAV = 21
 class Traversability(nn.Module):
     def forward(self, untraversable: torch.Tensor) -> torch.Tensor:
         device = untraversable.device
-        sq_distances = torch.where(untraversable, 0, MAX_TRAV**2)
+        sq_distances = torch.where((untraversable == 1) | (untraversable == 2), 0, MAX_TRAV**2)
         extra_col = torch.full(
             (sq_distances.shape[0], sq_distances.shape[1], 1),
             MAX_TRAV**2,
@@ -52,7 +52,7 @@ def save_onnx():
     model.eval()
 
     # Define the input shape
-    dummy_input = torch.randint(0, 2, (3, 224, 224), dtype=torch.bool)
+    dummy_input = torch.randint(0, 4, (3, 224, 224), dtype=torch.uint8)
 
     # Specify the output file path
     onnx_file_path = "traversability.onnx"
@@ -70,7 +70,7 @@ def save_onnx():
 
 
 def plot_test_input():
-    untrav = torch.zeros((3, 224, 224), dtype=torch.bool, device=torch.device("cuda"))
+    untrav = torch.zeros((3, 224, 224), dtype=torch.uint8, device=torch.device("cuda"))
     untrav[0, 4:40, 70:75] = True
     untrav[1, 60:80, 90:95] = True
     untrav[2, 20:30, 120:130] = True
